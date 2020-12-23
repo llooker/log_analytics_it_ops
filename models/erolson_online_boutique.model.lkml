@@ -105,6 +105,9 @@ explore: stderr {
 }
 
 explore: stdout {
+  always_filter: {
+    filters: [stdout.timestamp_time: "last 1 days"]
+  }
   join: stdout__resource {
     view_label: "Stdout: Resource"
     sql: LEFT JOIN UNNEST([${stdout.resource}]) as stdout__resource ;;

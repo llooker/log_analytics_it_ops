@@ -97,8 +97,11 @@ view: stdout {
 
   measure: count {
     type: count
-    drill_fields: [log_name]
+    drill_fields: [timestamp_time, http_request, resource, trace ]
   }
+
+
+
 }
 
 view: stdout__resource {
@@ -189,37 +192,66 @@ view: stdout__json_payload {
   }
 
   dimension: http_req_id {
+    label: "HTTP Request ID"
     type: string
     sql: ${TABLE}.http_req_id ;;
   }
 
   dimension: http_req_method {
+    label: "HTTP Request Method"
     type: string
     sql: ${TABLE}.http_req_method ;;
   }
 
   dimension: http_req_path {
+    label: "HTTP Request Path (full)"
     type: string
     sql: ${TABLE}.http_req_path ;;
   }
 
+  dimension: api {
+    label: "HTTP Request Path"
+    sql: REGEXP_EXTRACT(${http_req_path}, r"^\/([a-zA-Z]+)\/") ;;
+  }
+
   dimension: http_resp_bytes {
+    label: "HTTP Response Bytes"
     type: number
     sql: ${TABLE}.http_resp_bytes ;;
   }
 
   dimension: http_resp_status {
+    label: "HTTP Response Status"
     type: number
     sql: ${TABLE}.http_resp_status ;;
   }
 
+##### HTTP Response Time #####################################
+
   dimension: http_resp_took_ms {
+    label: "HTTP Response Time (ms)"
+    description: "HTTP response time in Milliseconds"
     type: number
     sql: ${TABLE}.http_resp_took_ms ;;
   }
 
-  measure:  max_request_time {
+  dimension: http_resp_took_sec {
+    label: "HTTP Response Time (seconds)"
+    description: "HTTP response time in Seconds"
+    type: number
+    sql: ${http_resp_took_ms} / 1000 ;;
+  }
+
+  measure:  max_http_response_time {
+    label: "HTTP Response (Max)"
     type:  max
+    sql: ${http_resp_took_ms} ;;
+  }
+
+  measure:  avg_http_response_time {
+    label: "HTTP Response (Avg)"
+    type:  average
+    value_format_name: decimal_0
     sql: ${http_resp_took_ms} ;;
   }
 
@@ -263,6 +295,12 @@ view: stdout__json_payload {
     type: number
     sql: ${TABLE}.v ;;
   }
+
+  set: common_drill_fields {
+    fields: [timestamp, http_req_method, api, http_resp_status, http_resp_took_ms]
+  }
+
+  drill_fields: [common_drill_fields*]
 }
 
 view: stdout__http_request {
