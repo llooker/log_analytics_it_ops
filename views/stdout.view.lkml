@@ -284,10 +284,10 @@ view: stdout__json_payload {
     label: "HTTP Response (Max)"
     type:  max
     sql: ${http_resp_took_ms} ;;
-    link: {
-      label: "Lookup Dashboard"
-      url: "/dashboards-next/932?Selected+Timestamp={{ stdout.timestamp_millisecond._value }}"
-    }
+    # link: {
+    #   label: "Lookup Dashboard"
+    #   url: "/dashboards-next/932?Selected+Timestamp={{ stdout.timestamp_millisecond._value }}"
+    # }
   }
 
   measure:  avg_http_response_time {
