@@ -76,6 +76,7 @@ view: stdout {
     timeframes: [
       raw,
       time,
+      millisecond,
       date,
       week,
       month,
@@ -83,6 +84,22 @@ view: stdout {
       year
     ]
     sql: ${TABLE}.timestamp ;;
+  }
+
+  parameter: selected_timestamp  {
+    type: string
+    suggest_dimension: timestamp_raw
+  }
+
+  dimension: is_selected_timestamp {
+    type: string
+    sql:
+    CASE
+    WHEN ${timestamp_millisecond} = {% parameter selected_timestamp %}
+    THEN 'Selected'
+    ELSE 'All Others'
+    END
+    ;;
   }
 
   dimension: trace {
@@ -98,6 +115,11 @@ view: stdout {
   measure: count {
     type: count
     drill_fields: [timestamp_time, http_request, resource, trace ]
+  }
+
+  measure: error_count {
+    type: count
+    filters: [stdout__json_payload.is_error: "Yes"]
   }
 
 
@@ -226,6 +248,11 @@ view: stdout__json_payload {
     sql: ${TABLE}.http_resp_status ;;
   }
 
+  dimension: is_error {
+    type: yesno
+    sql: ${http_resp_status} >= 400 ;;
+  }
+
 ##### HTTP Response Time #####################################
 
   dimension: http_resp_took_ms {
@@ -233,6 +260,17 @@ view: stdout__json_payload {
     description: "HTTP response time in Milliseconds"
     type: number
     sql: ${TABLE}.http_resp_took_ms ;;
+  }
+
+  parameter: http_resp_latency_slo {
+    type: number
+    suggest_dimension: http_resp_took_ms
+  }
+
+  dimension: http_resp_exceeds_slo_target {
+    label: "HTTP Response Exceeds SLO Target"
+    type: yesno
+    sql: ${http_resp_took_ms} >= {% parameter http_resp_latency_slo %} ;;
   }
 
   dimension: http_resp_took_sec {
@@ -246,6 +284,10 @@ view: stdout__json_payload {
     label: "HTTP Response (Max)"
     type:  max
     sql: ${http_resp_took_ms} ;;
+    link: {
+      label: "Lookup Dashboard"
+      url: "/dashboards-next/932?Selected+Timestamp={{ stdout.timestamp_millisecond._value }}"
+    }
   }
 
   measure:  avg_http_response_time {
