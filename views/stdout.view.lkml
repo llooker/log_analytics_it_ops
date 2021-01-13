@@ -187,6 +187,7 @@ view: stdout__resource__labels {
 
 view: stdout__labels {
   dimension: k8s_pod_app {
+    label: "Microservice Name"
     type: string
     sql: ${TABLE}.k8s_pod_app ;;
   }
