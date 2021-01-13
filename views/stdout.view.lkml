@@ -76,7 +76,9 @@ view: stdout {
     timeframes: [
       raw,
       time,
+      second,
       millisecond,
+      hour2,
       date,
       week,
       month,
@@ -120,6 +122,19 @@ view: stdout {
   measure: error_count {
     type: count
     filters: [stdout__json_payload.is_error: "Yes"]
+  }
+
+  measure: second_count {
+    # hidden: yes
+    type: count_distinct
+    sql: ${timestamp_second} ;;
+  }
+
+  measure: requests_per_second {
+    label: "RPS (Requests per second)"
+    type: number
+    value_format_name: decimal_2
+    sql: ${count} / NULLIF(${second_count}, 0) ;;
   }
 
 
