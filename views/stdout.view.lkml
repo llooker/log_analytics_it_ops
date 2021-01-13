@@ -312,6 +312,12 @@ view: stdout__json_payload {
     sql: ${http_resp_took_ms} ;;
   }
 
+  measure: response_time_95th {
+    type: percentile
+    percentile: 95
+    sql: ${http_resp_took_ms} ;;
+  }
+
   dimension: logevent {
     type: string
     sql: ${TABLE}.logevent ;;
@@ -325,6 +331,12 @@ view: stdout__json_payload {
   dimension: message {
     type: string
     sql: ${TABLE}.message ;;
+  }
+
+  dimension: is_outage {
+    description: "If the Req Path URL does not return a 200 Response, there is an outage"
+    type: yesno
+    sql: ${http_req_path} = '/_healthz' AND (NOT (${http_resp_status}  = 200)) AND ${message} = 'request complete' ;;
   }
 
   dimension: name {
