@@ -78,13 +78,21 @@ view: stdout {
       time,
       second,
       millisecond,
+      microsecond,
+      minute,
+      minute5,
+      minute15,
+      hour,
+      hour_of_day,
       hour2,
+      hour4,
       date,
       week,
       month,
       quarter,
       year
     ]
+    drill_fields: [timestamp_time, timestamp_hour, timestamp_hour2, timestamp_hour4]
     sql: ${TABLE}.timestamp ;;
   }
 
@@ -115,6 +123,7 @@ view: stdout {
   }
 
   measure: count {
+    label: "Count (Frontend Requests)"
     type: count
     drill_fields: [timestamp_time, http_request, resource, trace ]
   }
@@ -122,6 +131,18 @@ view: stdout {
   measure: error_count {
     type: count
     filters: [stdout__json_payload.is_error: "Yes"]
+  }
+
+  measure: error_percent {
+    type: number
+    value_format_name: percent_2
+    sql: ${error_count} / NULLIF(${count}, 0) ;;
+  }
+
+  measure: availability_percent {
+    type: number
+    value_format_name: percent_3
+    sql: 1 - (${error_count} / NULLIF(${count}, 0)) ;;
   }
 
   measure: second_count {
@@ -137,7 +158,11 @@ view: stdout {
     sql: ${count} / NULLIF(${second_count}, 0) ;;
   }
 
+  set: common_drill_fields {
+    fields: [stdout.timestamp_microseconds, stdout__json_payload.http_req_method, stdout__json_payload.api, stdout__json_payload.http_resp_status, stdout__json_payload.http_resp_took_ms, stdout__json_payload.http_resp_bytes, stdout__json_payload.http_req_id]
+  }
 
+  drill_fields: [common_drill_fields*]
 
 }
 
@@ -283,6 +308,11 @@ view: stdout__json_payload {
     suggest_dimension: http_resp_took_ms
   }
 
+  measure: slo {
+    type: max
+    sql: {% parameter http_resp_latency_slo %} ;;
+  }
+
   dimension: http_resp_exceeds_slo_target {
     label: "HTTP Response Exceeds SLO Target"
     type: yesno
@@ -367,7 +397,7 @@ view: stdout__json_payload {
   }
 
   set: common_drill_fields {
-    fields: [timestamp, http_req_method, api, http_resp_status, http_resp_took_ms]
+    fields: [timestamp, http_req_method, api, http_resp_status, http_resp_took_ms, http_resp_bytes, http_req_id]
   }
 
   drill_fields: [common_drill_fields*]

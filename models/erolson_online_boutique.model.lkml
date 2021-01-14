@@ -10,6 +10,58 @@ datagroup: erolson_online_boutique_default_datagroup {
 
 persist_with: erolson_online_boutique_default_datagroup
 
+
+explore: stdout {
+  label: "Frontend Service Logs"
+  always_filter: {
+    filters: [stdout.timestamp_time: "last 1 days"]
+    filters: [stdout__labels.k8s_pod_app: "frontend"]
+    filters: [stdout__json_payload.message: "request complete"]
+  }
+  join: stdout__resource {
+    view_label: "Stdout: Resource"
+    sql: LEFT JOIN UNNEST([${stdout.resource}]) as stdout__resource ;;
+    relationship: one_to_one
+  }
+
+  join: stdout__resource__labels {
+    view_label: "Stdout: Resource Labels"
+    sql: LEFT JOIN UNNEST([${stdout__resource.labels}]) as stdout__resource__labels ;;
+    relationship: one_to_one
+  }
+
+  join: stdout__labels {
+    view_label: "Stdout: Labels"
+    sql: LEFT JOIN UNNEST([${stdout.labels}]) as stdout__labels ;;
+    relationship: one_to_one
+  }
+
+  join: stdout__json_payload {
+    view_label: "Stdout: Jsonpayload"
+    sql: LEFT JOIN UNNEST([${stdout.json_payload}]) as stdout__json_payload ;;
+    relationship: one_to_one
+  }
+
+  join: stdout__http_request {
+    view_label: "Stdout: Httprequest"
+    sql: LEFT JOIN UNNEST([${stdout.http_request}]) as stdout__http_request ;;
+    relationship: one_to_one
+  }
+
+  join: stdout__source_location {
+    view_label: "Stdout: Sourcelocation"
+    sql: LEFT JOIN UNNEST([${stdout.source_location}]) as stdout__source_location ;;
+    relationship: one_to_one
+  }
+
+  join: stdout__operation {
+    view_label: "Stdout: Operation"
+    sql: LEFT JOIN UNNEST([${stdout.operation}]) as stdout__operation ;;
+    relationship: one_to_one
+  }
+}
+
+
 explore: clouderrorreporting_googleapis_com_insights {
   join: clouderrorreporting_googleapis_com_insights__resource {
     view_label: "Clouderrorreporting Googleapis Com Insights: Resource"
@@ -100,53 +152,6 @@ explore: stderr {
   join: stderr__operation {
     view_label: "Stderr: Operation"
     sql: LEFT JOIN UNNEST([${stderr.operation}]) as stderr__operation ;;
-    relationship: one_to_one
-  }
-}
-
-explore: stdout {
-  always_filter: {
-    filters: [stdout.timestamp_time: "last 1 days"]
-  }
-  join: stdout__resource {
-    view_label: "Stdout: Resource"
-    sql: LEFT JOIN UNNEST([${stdout.resource}]) as stdout__resource ;;
-    relationship: one_to_one
-  }
-
-  join: stdout__resource__labels {
-    view_label: "Stdout: Resource Labels"
-    sql: LEFT JOIN UNNEST([${stdout__resource.labels}]) as stdout__resource__labels ;;
-    relationship: one_to_one
-  }
-
-  join: stdout__labels {
-    view_label: "Stdout: Labels"
-    sql: LEFT JOIN UNNEST([${stdout.labels}]) as stdout__labels ;;
-    relationship: one_to_one
-  }
-
-  join: stdout__json_payload {
-    view_label: "Stdout: Jsonpayload"
-    sql: LEFT JOIN UNNEST([${stdout.json_payload}]) as stdout__json_payload ;;
-    relationship: one_to_one
-  }
-
-  join: stdout__http_request {
-    view_label: "Stdout: Httprequest"
-    sql: LEFT JOIN UNNEST([${stdout.http_request}]) as stdout__http_request ;;
-    relationship: one_to_one
-  }
-
-  join: stdout__source_location {
-    view_label: "Stdout: Sourcelocation"
-    sql: LEFT JOIN UNNEST([${stdout.source_location}]) as stdout__source_location ;;
-    relationship: one_to_one
-  }
-
-  join: stdout__operation {
-    view_label: "Stdout: Operation"
-    sql: LEFT JOIN UNNEST([${stdout.operation}]) as stdout__operation ;;
     relationship: one_to_one
   }
 }
