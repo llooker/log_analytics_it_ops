@@ -92,7 +92,7 @@ view: stdout {
       quarter,
       year
     ]
-    drill_fields: [timestamp_time, timestamp_hour, timestamp_hour2, timestamp_hour4]
+    drill_fields: [timestamp_hour, timestamp_minute, timestamp_time]
     sql: ${TABLE}.timestamp ;;
   }
 
