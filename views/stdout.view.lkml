@@ -284,9 +284,15 @@ view: stdout__json_payload {
   }
 
   dimension: http_resp_status {
-    label: "HTTP Response Status"
+    label: "HTTP Response / Error Status"
     type: number
     sql: ${TABLE}.http_resp_status ;;
+    html:
+    {% if value >= 400 %}
+    <div style="background:  #FF0000; border-radius: 2px; color: #fff; display: inline-block; font-size: 11px; font-weight: bold; line-height: 1; padding: 3px 4px; width: 100%; text-align: center;">{{ rendered_value }}</div>
+    {% else %}
+    <div style="background: #8BC34A; border-radius: 2px; color: #fff; display: inline-block; font-size: 11px; font-weight: bold; line-height: 1; padding: 3px 4px; width: 100%; text-align: center;">{{ rendered_value }}</div>
+    {% endif %} ;;
   }
 
   dimension: is_error {
