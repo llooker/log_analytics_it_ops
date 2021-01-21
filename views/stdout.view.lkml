@@ -159,7 +159,7 @@ view: stdout {
   }
 
   set: common_drill_fields {
-    fields: [stdout.timestamp_microseconds, stdout__json_payload.http_req_method, stdout__json_payload.api, stdout__json_payload.http_resp_status, stdout__json_payload.http_resp_took_ms, stdout__json_payload.http_resp_bytes, stdout__json_payload.http_req_id]
+    fields: [stdout.timestamp_second, stdout__json_payload.http_req_method, stdout__json_payload.api, stdout__json_payload.http_resp_status, stdout__json_payload.http_resp_took_ms, stdout__json_payload.http_resp_bytes, stdout__json_payload.http_req_id]
   }
 
   drill_fields: [common_drill_fields*]
