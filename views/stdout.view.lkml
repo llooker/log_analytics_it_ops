@@ -146,7 +146,7 @@ view: stdout {
   }
 
   measure: second_count {
-    # hidden: yes
+    hidden: yes
     type: count_distinct
     sql: ${timestamp_second} ;;
   }
