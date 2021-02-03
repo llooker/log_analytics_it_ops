@@ -158,6 +158,12 @@ view: stdout {
     sql: ${count} / NULLIF(${second_count}, 0) ;;
   }
 
+  measure: order_count {
+    type: count
+    filters: [stdout__labels.k8s_pod_app: "checkoutservice"]
+    filters: [stdout__json_payload.message: "payment went through%"]
+  }
+
   set: common_drill_fields {
     fields: [stdout.timestamp_second, stdout__json_payload.http_req_method, stdout__json_payload.api, stdout__json_payload.http_resp_status, stdout__json_payload.http_resp_took_ms, stdout__json_payload.http_resp_bytes, stdout__json_payload.http_req_id]
   }
@@ -209,11 +215,6 @@ view: stdout__resource__labels {
     sql: ${TABLE}.project_id ;;
   }
 
-  measure: order_count {
-    type: count
-    filters: [stdout__labels.k8s_pod_app: "checkoutservice"]
-    filters: [stdout__json_payload.message: "payment went through%"]
-  }
 }
 
 view: stdout__labels {
