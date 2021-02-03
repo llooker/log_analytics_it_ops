@@ -211,10 +211,8 @@ view: stdout__resource__labels {
 
   measure: order_count {
     type: count
-    filters: [stdout__resource.type: "k8s_container"]
-    filters: [container_name: "server"]
     filters: [stdout__labels.k8s_pod_app: "checkoutservice"]
-    filters: [namespace_name: "default"]
+    filters: [stdout__json_payload.message: "payment went through%"]
   }
 }
 
