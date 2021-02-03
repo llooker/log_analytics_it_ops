@@ -11,8 +11,9 @@ datagroup: erolson_online_boutique_default_datagroup {
 persist_with: erolson_online_boutique_default_datagroup
 
 
+
 explore: stdout {
-  label: "Frontend Service Logs"
+  label: "Frontend Service Monitoring"
   always_filter: {
     filters: [stdout.timestamp_time: "last 1 days"]
     filters: [stdout__labels.k8s_pod_app: "frontend"]
@@ -60,6 +61,8 @@ explore: stdout {
     relationship: one_to_one
   }
 }
+
+
 
 
 explore: clouderrorreporting_googleapis_com_insights {

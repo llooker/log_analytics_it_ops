@@ -1,4 +1,5 @@
-view: stdout {
+#include: "/views/**/*.view"
+view: product_orders {
   sql_table_name: `onlineboutique_default_namespace.stdout`
     ;;
 
@@ -130,7 +131,7 @@ view: stdout {
 
   measure: error_count {
     type: count
-    filters: [stdout__json_payload.is_error: "Yes"]
+    filters: [orders__json_payload.is_error: "Yes"]
   }
 
   measure: error_percent {
@@ -166,7 +167,7 @@ view: stdout {
 
 }
 
-view: stdout__resource {
+view: orders__resource {
   dimension: labels {
     hidden: yes
     sql: ${TABLE}.labels ;;
@@ -178,7 +179,7 @@ view: stdout__resource {
   }
 }
 
-view: stdout__resource__labels {
+view: orders__resource__labels {
   dimension: cluster_name {
     type: string
     sql: ${TABLE}.cluster_name ;;
@@ -211,14 +212,11 @@ view: stdout__resource__labels {
 
   measure: order_count {
     type: count
-    filters: [stdout__resource.type: "k8s_container"]
-    filters: [container_name: "server"]
-    filters: [stdout__labels.k8s_pod_app: "checkoutservice"]
-    filters: [namespace_name: "default"]
+    filters: [orders__labels.k8s_pod_app: "checkoutservice"]
   }
 }
 
-view: stdout__labels {
+view: orders__labels {
   dimension: k8s_pod_app {
     label: "Microservice Name"
     type: string
@@ -251,7 +249,7 @@ view: stdout__labels {
   }
 }
 
-view: stdout__json_payload {
+view: orders__json_payload {
   dimension: currency {
     type: string
     sql: ${TABLE}.currency ;;
@@ -417,7 +415,7 @@ view: stdout__json_payload {
   drill_fields: [common_drill_fields*]
 }
 
-view: stdout__http_request {
+view: orders__http_request {
   dimension: cache_fill_bytes {
     type: number
     sql: ${TABLE}.cacheFillBytes ;;
@@ -489,7 +487,7 @@ view: stdout__http_request {
   }
 }
 
-view: stdout__source_location {
+view: orders__source_location {
   dimension: file {
     type: string
     sql: ${TABLE}.file ;;
@@ -506,7 +504,7 @@ view: stdout__source_location {
   }
 }
 
-view: stdout__operation {
+view: orders__operation {
   drill_fields: [id]
 
   dimension: id {
