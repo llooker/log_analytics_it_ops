@@ -60,6 +60,26 @@ explore: stdout {
     sql: LEFT JOIN UNNEST([${stdout.operation}]) as stdout__operation ;;
     relationship: one_to_one
   }
+
+
+  query: last_30_minutes {
+          dimensions: [
+            stdout__json_payload.api,
+            stdout__json_payload.http_req_id,
+            stdout__json_payload.http_req_method,
+            stdout__json_payload.http_resp_bytes,
+            stdout__json_payload.http_resp_status,
+            stdout__json_payload.http_resp_took_ms,
+            stdout__json_payload.message,
+            timestamp_second
+          ]
+          filters: [
+            stdout.timestamp_time: "30 minutes",
+            stdout__json_payload.message: "-NULL",
+            stdout__labels.k8s_pod_app: "frontend"
+          ]
+          limit: 500
+        }
 }
 
 
