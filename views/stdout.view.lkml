@@ -96,21 +96,21 @@ view: stdout {
     sql: ${TABLE}.timestamp ;;
   }
 
-  parameter: selected_timestamp  {
-    type: string
-    suggest_dimension: timestamp_raw
-  }
+  # parameter: selected_timestamp  {
+  #   type: string
+  #   suggest_dimension: timestamp_raw
+  # }
 
-  dimension: is_selected_timestamp {
-    type: string
-    sql:
-    CASE
-    WHEN ${timestamp_millisecond} = {% parameter selected_timestamp %}
-    THEN 'Selected'
-    ELSE 'All Others'
-    END
-    ;;
-  }
+  # dimension: is_selected_timestamp {
+  #   type: string
+  #   sql:
+  #   CASE
+  #   WHEN ${timestamp_millisecond} = {% parameter selected_timestamp %}
+  #   THEN 'Selected'
+  #   ELSE 'All Others'
+  #   END
+  #   ;;
+  # }
 
   dimension: trace {
     type: string
