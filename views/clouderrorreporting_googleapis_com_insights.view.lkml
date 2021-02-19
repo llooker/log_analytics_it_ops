@@ -1,5 +1,5 @@
 view: clouderrorreporting_googleapis_com_insights {
-  sql_table_name: `onlineboutique_default_namespace.clouderrorreporting_googleapis_com_insights`
+  sql_table_name: `looker-private-demo.online_boutique_default_namespace.clouderrorreporting_googleapis_com_insights`
     ;;
 
   dimension: http_request {

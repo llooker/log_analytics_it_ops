@@ -1,5 +1,5 @@
 view: stderr {
-  sql_table_name: `onlineboutique_default_namespace.stderr`
+  sql_table_name: `looker-private-demo.online_boutique_default_namespace.stderr`
     ;;
 
   dimension: http_request {

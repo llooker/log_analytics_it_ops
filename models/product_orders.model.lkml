@@ -1,4 +1,4 @@
-connection: "hipster_store_logs"
+connection: "thelook_daily_updates"
 
 include: "/views/**/*.view"
 

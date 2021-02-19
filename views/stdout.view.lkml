@@ -1,5 +1,5 @@
 view: stdout {
-  sql_table_name: `onlineboutique_default_namespace.stdout`
+  sql_table_name: `looker-private-demo.online_boutique_default_namespace.stdout`
     ;;
 
   dimension: http_request {
