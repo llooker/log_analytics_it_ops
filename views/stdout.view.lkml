@@ -2,6 +2,49 @@ view: stdout {
   sql_table_name: `looker-private-demo.online_boutique_default_namespace.stdout`
     ;;
 
+  filter: date_filter {
+    description: "Use this date filter in combination with the timeframes dimension for dynamic date filtering"
+    type: date
+  }
+
+  dimension_group: filter_start_date {
+    type: time
+    timeframes: [raw,date, time]
+    sql: CASE WHEN {% date_start date_filter %} IS NULL THEN '1970-01-01' ELSE CAST({% date_start date_filter %} AS DATETIME) END ;;
+  }
+
+  dimension_group: filter_end_date {
+    type: time
+    timeframes: [raw,date, time]
+    sql: CASE WHEN {% date_end date_filter %} IS NULL THEN CURRENT_DATE ELSE CAST({% date_end date_filter %} AS DATETIME) END;;
+  }
+
+  dimension: interval {
+    type: number
+    sql: TIMESTAMP_DIFF(${filter_end_date_raw}, ${filter_start_date_raw}, SECOND);;
+  }
+
+  dimension_group: dynamic_timeframe {
+    type: time
+    timeframes: [time]
+    sql: CASE
+          WHEN ${interval} >= 216000 THEN PARSE_TIMESTAMP("%Y-%m-%d %k", ${timestamp_hour} )
+          WHEN ${interval} >= 3600 THEN PARSE_TIMESTAMP("%Y-%m-%d %k:%M", ${timestamp_minute})
+          ELSE PARSE_TIMESTAMP("%Y-%m-%d %k:%M:%S", ${timestamp_second})
+          END;;
+  }
+
+# CASE
+#           WHEN ${interval} > 1296000000 THEN CAST(${timestamp_year} AS STRING)
+#           WHEN ${interval} >= 155520000 THEN ${timestamp_month}
+#           WHEN ${interval} >= 36288000 THEN ${timestamp_week}
+#           WHEN ${interval} >= 5184000 THEN CAST(${timestamp_date} AS STRING)
+#           WHEN ${interval} >= 216000 THEN ${timestamp_hour}
+#           WHEN ${interval} >= 3600 THEN ${timestamp_minute}
+#           ELSE CAST(${timestamp_second} AS STRING)
+#           END;;
+
+
   dimension: http_request {
     hidden: yes
     sql: ${TABLE}.httpRequest ;;
@@ -143,6 +186,7 @@ view: stdout {
     type: number
     value_format_name: percent_3
     sql: 1 - (${error_count} / NULLIF(${count}, 0)) ;;
+    drill_fields: [timestamp_minute, availability_percent]
   }
 
   measure: second_count {

@@ -1,4 +1,4 @@
-connection: "thelook_daily_updates"
+connection: "looker-private-demo"
 
 # include all the views
 include: "/views/**/*.view"
@@ -82,7 +82,56 @@ explore: stdout {
         }
 }
 
+explore: dynamic_timeframes {
+  from: stdout
+  sql_always_where: {% condition dynamic_timeframes.date_filter %} dynamic_timeframes.timestamp  {% endcondition %} ;;
+  always_filter: {
+    filters: [dynamic_timeframes.date_filter: "last 1 days"]
+    filters: [stdout__labels.k8s_pod_app: "frontend"]
+    filters: [stdout__json_payload.message: "request complete"]
+  }
+  join: stdout__resource {
+    view_label: "Stdout: Resource"
+    sql: LEFT JOIN UNNEST([${dynamic_timeframes.resource}]) as stdout__resource ;;
+    relationship: one_to_one
+  }
 
+  join: stdout__resource__labels {
+    view_label: "Stdout: Resource Labels"
+    sql: LEFT JOIN UNNEST([${stdout__resource.labels}]) as stdout__resource__labels ;;
+    relationship: one_to_one
+  }
+
+  join: stdout__labels {
+    view_label: "Stdout: Labels"
+    sql: LEFT JOIN UNNEST([${dynamic_timeframes.labels}]) as stdout__labels ;;
+    relationship: one_to_one
+  }
+
+  join: stdout__json_payload {
+    view_label: "Stdout: Jsonpayload"
+    sql: LEFT JOIN UNNEST([${dynamic_timeframes.json_payload}]) as stdout__json_payload ;;
+    relationship: one_to_one
+  }
+
+  join: stdout__http_request {
+    view_label: "Stdout: Httprequest"
+    sql: LEFT JOIN UNNEST([${dynamic_timeframes.http_request}]) as stdout__http_request ;;
+    relationship: one_to_one
+  }
+
+  join: stdout__source_location {
+    view_label: "Stdout: Sourcelocation"
+    sql: LEFT JOIN UNNEST([${dynamic_timeframes.source_location}]) as stdout__source_location ;;
+    relationship: one_to_one
+  }
+
+  join: stdout__operation {
+    view_label: "Stdout: Operation"
+    sql: LEFT JOIN UNNEST([${dynamic_timeframes.operation}]) as stdout__operation ;;
+    relationship: one_to_one
+  }
+}
 
 
 explore: clouderrorreporting_googleapis_com_insights {
