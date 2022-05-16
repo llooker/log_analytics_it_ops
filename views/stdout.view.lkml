@@ -96,6 +96,14 @@ view: stdout {
     sql: ${TABLE}.timestamp ;;
   }
 
+  dimension_group: timestamp_test {
+    label: "Second5"
+    group_label: "Timestamp Date"
+    type: time
+    timeframes: [second]
+    sql:  (FORMAT_TIMESTAMP('%F %H:%M:%S', TIMESTAMP_TRUNC(TIMESTAMP_SUB(${timestamp_raw} , INTERVAL MOD(EXTRACT(SECOND FROM stdout.timestamp ), 5) SECOND), SECOND))) ;;
+  }
+
   # parameter: selected_timestamp  {
   #   type: string
   #   suggest_dimension: timestamp_raw
@@ -179,6 +187,7 @@ view: stdout {
   }
 
   dimension_group: filter_start_date {
+    hidden: yes
     type: time
     timeframes: [raw,date, time]
     sql: CASE WHEN {% date_start date_filter %} IS NULL THEN '1970-01-01' ELSE CAST({% date_start date_filter %} AS DATETIME) END ;;
@@ -186,6 +195,7 @@ view: stdout {
 
   dimension_group: filter_end_date {
     type: time
+    hidden: yes
     timeframes: [raw,date, time]
     sql: CASE WHEN {% date_end date_filter %} IS NULL THEN CURRENT_DATE ELSE CAST({% date_end date_filter %} AS DATETIME) END;;
   }
@@ -195,20 +205,30 @@ view: stdout {
     sql: TIMESTAMP_DIFF(${filter_end_date_raw}, ${filter_start_date_raw}, SECOND);;
   }
 
-  dimension_group: dynamic_timeframe {
+  dimension_group: dynamic_timeframe_summary {
+    label: "Dynamic Time (Summary)"
+    type: time
+    timeframes: [time]
+    sql: CASE
+          WHEN ${interval} <= 500 THEN PARSE_TIMESTAMP("%Y-%m-%d %k:%M:%S", ${timestamp_second})
+          WHEN ${interval} <= 30000 THEN PARSE_TIMESTAMP("%Y-%m-%d %k:%M", ${timestamp_minute})
+          WHEN ${interval} <= 1800000 THEN PARSE_TIMESTAMP("%Y-%m-%d %k", ${timestamp_hour} )
+          ELSE PARSE_TIMESTAMP("%Y-%m-%d",CAST(EXTRACT(DATE FROM ${timestamp_raw}) AS STRING))
+          END;;
+  }
+
+  dimension_group: dynamic_timeframe_detail {
+    label: "Dynamic Time (Detail)"
     type: time
     timeframes: [time]
     sql: CASE
           WHEN ${interval} <= 1500 THEN PARSE_TIMESTAMP("%Y-%m-%d %k:%M:%S", ${timestamp_second})
           WHEN ${interval} <= 90000 THEN PARSE_TIMESTAMP("%Y-%m-%d %k:%M", ${timestamp_minute})
-          ELSE PARSE_TIMESTAMP("%Y-%m-%d %k", ${timestamp_hour} )
+          WHEN ${interval} <= 5400000 THEN PARSE_TIMESTAMP("%Y-%m-%d %k", ${timestamp_hour} )
+          ELSE PARSE_TIMESTAMP("%Y-%m-%d",CAST(EXTRACT(DATE FROM ${timestamp_raw}) AS STRING))
           END;;
   }
 
-  dimension_group: dynamic_timeframe_2 {
-    type: time
-    sql:  ;;
-}
 
 
 # CASE
@@ -372,6 +392,7 @@ view: stdout__json_payload {
   parameter: http_resp_latency_slo {
     type: number
     suggest_dimension: http_resp_took_ms
+    default_value: "250"
   }
 
   measure: slo {
