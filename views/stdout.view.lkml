@@ -97,28 +97,13 @@ view: stdout {
   }
 
   dimension_group: timestamp_test {
+    hidden: yes
     label: "Second5"
     group_label: "Timestamp Date"
     type: time
     timeframes: [second]
     sql:  (FORMAT_TIMESTAMP('%F %H:%M:%S', TIMESTAMP_TRUNC(TIMESTAMP_SUB(${timestamp_raw} , INTERVAL MOD(EXTRACT(SECOND FROM stdout.timestamp ), 5) SECOND), SECOND))) ;;
   }
-
-  # parameter: selected_timestamp  {
-  #   type: string
-  #   suggest_dimension: timestamp_raw
-  # }
-
-  # dimension: is_selected_timestamp {
-  #   type: string
-  #   sql:
-  #   CASE
-  #   WHEN ${timestamp_millisecond} = {% parameter selected_timestamp %}
-  #   THEN 'Selected'
-  #   ELSE 'All Others'
-  #   END
-  #   ;;
-  # }
 
   dimension: trace {
     type: string
@@ -205,10 +190,9 @@ view: stdout {
     sql: TIMESTAMP_DIFF(${filter_end_date_raw}, ${filter_start_date_raw}, SECOND);;
   }
 
-  dimension_group: dynamic_timeframe_summary {
+  dimension: dynamic_timeframe_summary {
     label: "Dynamic Time (Summary)"
-    type: time
-    timeframes: [time]
+    type: date_time
     sql: CASE
           WHEN ${interval} <= 500 THEN PARSE_TIMESTAMP("%Y-%m-%d %k:%M:%S", ${timestamp_second})
           WHEN ${interval} <= 30000 THEN PARSE_TIMESTAMP("%Y-%m-%d %k:%M", ${timestamp_minute})
@@ -217,11 +201,12 @@ view: stdout {
           END;;
   }
 
-  dimension_group: dynamic_timeframe_detail {
-    label: "Dynamic Time (Detail)"
-    type: time
-    timeframes: [time]
+  dimension: dynamic_timeframe_detail {
+    type: date_millisecond
+    label: "Dynamic Timeframe (Detail)"
+    description: "Will dynamically choose the best detailed date/time granularity based on user filtering `date_filter`"
     sql: CASE
+          WHEN ${interval} <= 80 THEN PARSE_TIMESTAMP("%Y-%m-%d %k:%M:%E3S", ${timestamp_millisecond})
           WHEN ${interval} <= 1500 THEN PARSE_TIMESTAMP("%Y-%m-%d %k:%M:%S", ${timestamp_second})
           WHEN ${interval} <= 90000 THEN PARSE_TIMESTAMP("%Y-%m-%d %k:%M", ${timestamp_minute})
           WHEN ${interval} <= 5400000 THEN PARSE_TIMESTAMP("%Y-%m-%d %k", ${timestamp_hour} )
